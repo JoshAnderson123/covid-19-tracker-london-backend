@@ -29,12 +29,14 @@ const getCases = async date => {
       cumulative: "cumDeathsByDeathDate"
     }
   }
+  
   const apiParams = {
     filters: filters.join(";"),
     structure: JSON.stringify(structure),
   };
 
-  const result = await getData(apiParams);
+  const result = await getData(apiParams)
+  if (!result.data) return null
   const londonData = result.data.filter(area => cfg.boroughNames.includes(area.name))
   return londonData
 }
@@ -77,11 +79,19 @@ const uploadAllCases = async () => {
   let currentDate = new Date(startDateStr)
   while (currentDate <= endDate) {
     // console.log(formatDate(currentDate))
-    axios.get(`http://localhost:5000/uploadCaseData?date=${formatDate(currentDate)}`)
+    axios.get(`http://localhost:8080/uploadCaseData?date=${formatDate(currentDate)}`)
     currentDate.setDate(currentDate.getDate() + 1);
   }
 }
 
+const uploadCases = async (currentDate, endDate) => {
+
+  while (currentDate <= endDate) { // TODO - check if response was successful or not
+    // console.log(formatDate(currentDate))
+    axios.get(`http://localhost:8080/uploadCaseData?date=${formatDate(currentDate)}`)
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+}
 
 
 
@@ -89,5 +99,7 @@ module.exports = {
   caseFormatAPItoDB,
   getData,
   getCases,
-  uploadAllCases
+  uploadAllCases,
+  uploadCases,
+  formatDate
 }

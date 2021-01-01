@@ -46,7 +46,7 @@ router.route("/uploadCaseData").get((req, res) => {
 
     const formattedResult = util.caseFormatAPItoDB(result)
 
-    model.findOneAndUpdate({date}, formattedResult, {upsert: true}, (err, result) => {
+    model.cases.findOneAndUpdate({date}, formattedResult, {upsert: true}, (err, result) => {
       if (err) res.send(err)
       else res.send(result)
     })
@@ -55,15 +55,52 @@ router.route("/uploadCaseData").get((req, res) => {
   })
 })
 
-router.route("/getData").get((req, res) => {
-  model.find({}, (err, result) => {
+router.route("/showCaseData").get((req, res) => {
+
+  const date = req.query.date
+
+  util.getCases(date).then(result => {
+
+    if (!result) {
+      res.send(`Covid-19 API returned no data for ${date}`)
+      return
+    }
+
+    const formattedResult = util.caseFormatAPItoDB(result)
+    res.send(formattedResult)
+
+  }, error => {
+
+    res.send(`error: ${error}`)
+  })
+})
+
+router.route("/getCaseData").get((req, res) => {
+  model.cases.find({}, (err, result) => {
+    if (err) res.send(err)
+    else res.send(result)
+  })
+})
+
+router.route("/getConfigData").get((req, res) => {
+  model.config.find({}, (err, result) => {
     if (err) res.send(err)
     else res.send(result)
   })
 })
 
 router.route("/deleteAll").get((req, res) => {
-  model.deleteMany({}, (err, result) => {
+  model.cases.deleteMany({}, (err, result) => {
+    if (err) res.send(err)
+    else res.send(result)
+  })
+})
+
+router.route("/deleteRecord").get((req, res) => {
+
+  const date = req.query.date
+
+  model.cases.deleteMany({date: date}, (err, result) => {
     if (err) res.send(err)
     else res.send(result)
   })
@@ -74,8 +111,48 @@ router.route("/uploadDates").get((req, res) => {
   res.send("success")
 })
 
+router.route("/currentDate").get((req, res) => {
+  const currentDate = util.formatDate(new Date())
+  res.send(currentDate > "null")
+})
+
+router.route("/getDateSpan").get((req, res) => {
+  model.config.find({}, (err, result) => {
+
+    const startDate = new Date(result[0].startDate)
+    const endDate = new Date(result[0].endDate)
+    const dateSpan = Math.round((endDate - startDate) / (24*60*60*1000))
+
+    if (err) res.send(err)
+    else res.send(`${dateSpan}`)
+  })
+})
+
 
 /// START SERVER ///
-app.listen(PORT, function () {
+app.listen(PORT, () => {
   console.log("Server is running on Port: " + PORT);
+  updateRecords()
+  //setInterval(updateRecords, 24*60*60*1000) // Use this once the server is ready to upload
 });
+
+
+/// UPDATE RECORDS ///
+function updateRecords() {
+  model.config.find({}, (err, result) => {
+
+    const currentDate = new Date(util.formatDate(new Date()))
+    const endDate = new Date(result[0].endDate)
+
+    if (currentDate > endDate) {
+      console.log(`Updating Records. Last Date: ${endDate}, Current Date: ${currentDate}`)
+      util.uploadCases(endDate, currentDate-1)
+      model.config.findOneAndUpdate({}, {endDate: util.formatDate(currentDate)}, {upsert: true}, (err, result) => {
+        if (err) console.log(`Error updating new date: ${err}`)
+        else console.log(`Success updating new date: ${result}`)
+      })
+    } else {
+      console.log(`Records up to date. Current date: ${util.formatDate(currentDate)}`)
+    }
+  })
+}
