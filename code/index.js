@@ -144,15 +144,20 @@ function updateRecords() {
     const currentDate = new Date(util.formatDate(new Date()))
     const endDate = new Date(result[0].endDate)
 
-    if (currentDate > endDate) {
+    const endDateAdd1 = new Date(endDate) // Accounts for the day lag in getting results
+    endDateAdd1.setDate(endDate.getDate() + 1);
+    const currentDateMin1 = new Date(currentDate) // Accounts for the day lag in getting results
+    currentDateMin1.setDate(currentDate.getDate() - 1);
+
+    if (currentDate > endDateAdd1) {
       console.log(`Updating Records. Last Date: ${endDate}, Current Date: ${currentDate}`)
-      util.uploadCases(endDate, currentDate-1)
-      model.config.findOneAndUpdate({}, {endDate: util.formatDate(currentDate)}, {upsert: true}, (err, result) => {
+      util.uploadCases(endDate, currentDateMin1)
+      model.config.findOneAndUpdate({}, {endDate: util.formatDate(currentDateMin1)}, {upsert: true}, (err, result) => {
         if (err) console.log(`Error updating new date: ${err}`)
         else console.log(`Success updating new date: ${result}`)
       })
     } else {
-      console.log(`Records up to date. Current date: ${util.formatDate(currentDate)}`)
+      console.log(`Records up to date. Current date: ${util.formatDate(currentDate)}. Latest date: ${util.formatDate(currentDateMin1)}.`)
     }
   })
 }

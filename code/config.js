@@ -32,5 +32,6 @@ module.exports = {
     "Waltham Forest",
     "Wandsworth",
     "Westminster"
-  ]
+  ],
+  SERVER_URL: "http://localhost:8080"
 }

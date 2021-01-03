@@ -79,7 +79,7 @@ const uploadAllCases = async () => {
   let currentDate = new Date(startDateStr)
   while (currentDate <= endDate) {
     // console.log(formatDate(currentDate))
-    axios.get(`http://localhost:8080/uploadCaseData?date=${formatDate(currentDate)}`)
+    axios.get(`${cfg.SERVER_URL}/uploadCaseData?date=${formatDate(currentDate)}`)
     currentDate.setDate(currentDate.getDate() + 1);
   }
 }
@@ -88,7 +88,7 @@ const uploadCases = async (currentDate, endDate) => {
 
   while (currentDate <= endDate) { // TODO - check if response was successful or not
     // console.log(formatDate(currentDate))
-    axios.get(`http://localhost:8080/uploadCaseData?date=${formatDate(currentDate)}`)
+    axios.get(`${cfg.SERVER_URL}/uploadCaseData?date=${formatDate(currentDate)}`)
     currentDate.setDate(currentDate.getDate() + 1);
   }
 }
