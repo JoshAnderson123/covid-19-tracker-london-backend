@@ -6,7 +6,7 @@ const axios = require("axios")
 const cfg = require("./config")
 const util = require("./util")
 
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 const app = express()
 app.use(cors());
 
