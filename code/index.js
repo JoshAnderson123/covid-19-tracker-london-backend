@@ -30,7 +30,7 @@ const router = express.Router();
 app.use("/", router);
 
 router.route("/test").get((req, res) => {
-  res.send("Hello World!")
+  res.send("Hello World!") // Ready for Heroku
 })
 
 router.route("/loadData").get((req, res) => {
