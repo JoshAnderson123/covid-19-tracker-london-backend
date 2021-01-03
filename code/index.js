@@ -29,6 +29,10 @@ connection.once("open", function () {
 const router = express.Router();
 app.use("/", router);
 
+router.route("/test").get((req, res) => {
+  res.send("Hello World!")
+})
+
 router.route("/loadData").get((req, res) => {
   util.getCases(req.query.date).then(result => {
     const formattedResult = util.caseFormatAPItoDB(result)
