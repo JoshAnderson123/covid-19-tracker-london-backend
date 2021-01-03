@@ -71,28 +71,8 @@ const formatDate = date => {
   return [year, month, day].join('-');
 }
 
-const uploadCases = async (currentDate, endDate) => {
-
-  while (currentDate <= endDate) {
-    axios.get(`${cfg.SERVER_URL}/uploadCaseData?date=${formatDate(currentDate)}`)
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-}
-
-const uploadAllCases = async () => {
-
-  const startDateStr = "2020-03-15"
-  const endDate = new Date("2020-12-25")
-  let currentDate = new Date(startDateStr)
-  uploadCases(currentDate, endDate)
-}
-
-
-
 module.exports = {
   caseFormatAPItoDB,
   getCases,
-  uploadAllCases,
-  uploadCases,
   formatDate
 }

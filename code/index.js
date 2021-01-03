@@ -33,49 +33,11 @@ router.route("/test").get((req, res) => {
   res.send("Hello World!") // Ready for Heroku
 })
 
-router.route("/loadData").get((req, res) => {
-  util.getCases(req.query.date).then(result => {
-    const formattedResult = util.caseFormatAPItoDB(result)
-    res.send(formattedResult)
-  }, error => {
-    res.send(`error: ${error}`)
-  })
-})
-
 router.route("/uploadCaseData").get((req, res) => {
 
-  const date = req.query.date
-
-  util.getCases(date).then(result => {
-
-    const formattedResult = util.caseFormatAPItoDB(result)
-
-    model.cases.findOneAndUpdate({date}, formattedResult, {upsert: true}, (err, result) => {
-      if (err) res.send(err)
-      else res.send(result)
-    })
-  }, error => {
-    res.send(`error: ${error}`)
-  })
-})
-
-router.route("/showCaseData").get((req, res) => {
-
-  const date = req.query.date
-
-  util.getCases(date).then(result => {
-
-    if (!result) {
-      res.send(`Covid-19 API returned no data for ${date}`)
-      return
-    }
-
-    const formattedResult = util.caseFormatAPItoDB(result)
-    res.send(formattedResult)
-
-  }, error => {
-
-    res.send(`error: ${error}`)
+  uploadCase(req.query.date, (err, result) => {
+    if (err) res.send(err)
+    else res.send(result)
   })
 })
 
@@ -93,44 +55,6 @@ router.route("/getConfigData").get((req, res) => {
   })
 })
 
-router.route("/deleteAll").get((req, res) => {
-  model.cases.deleteMany({}, (err, result) => {
-    if (err) res.send(err)
-    else res.send(result)
-  })
-})
-
-router.route("/deleteRecord").get((req, res) => {
-
-  const date = req.query.date
-
-  model.cases.deleteMany({date: date}, (err, result) => {
-    if (err) res.send(err)
-    else res.send(result)
-  })
-})
-
-router.route("/uploadDates").get((req, res) => {
-  util.uploadAllCases()
-  res.send("success")
-})
-
-router.route("/currentDate").get((req, res) => {
-  const currentDate = util.formatDate(new Date())
-  res.send(currentDate > "null")
-})
-
-router.route("/getDateSpan").get((req, res) => {
-  model.config.find({}, (err, result) => {
-
-    const startDate = new Date(result[0].startDate)
-    const endDate = new Date(result[0].endDate)
-    const dateSpan = Math.round((endDate - startDate) / (24*60*60*1000))
-
-    if (err) res.send(err)
-    else res.send(`${dateSpan}`)
-  })
-})
 
 
 /// START SERVER ///
@@ -155,8 +79,8 @@ function updateRecords() {
 
     if (currentDate > endDateAdd1) {
       console.log(`Updating Records. Last Date: ${endDate}, Current Date: ${currentDate}`)
-      util.uploadCases(endDate, currentDateMin1)
-      model.config.findOneAndUpdate({}, {endDate: util.formatDate(currentDateMin1)}, {upsert: true}, (err, result) => {
+      uploadCases(endDate, currentDateMin1)
+      model.config.findOneAndUpdate({}, { endDate: util.formatDate(currentDateMin1) }, { upsert: true }, (err, result) => {
         if (err) console.log(`Error updating new date: ${err}`)
         else console.log(`Success updating new date: ${result}`)
       })
@@ -164,4 +88,28 @@ function updateRecords() {
       console.log(`Records up to date. Current date: ${util.formatDate(currentDate)}. Latest date: ${util.formatDate(currentDateMin1)}`)
     }
   })
+}
+
+/// UPLOAD CASES ///
+async function uploadCase(date, callback) {
+
+  util.getCases(date).then(result => {
+
+    const formattedResult = util.caseFormatAPItoDB(result)
+
+    model.cases.findOneAndUpdate({ date }, formattedResult, { upsert: true }, (err, result) => {
+      if (err) callback(err, null)
+      else callback(null, result)
+    })
+  }, error => {
+    callback(error, null)
+  })
+}
+
+async function uploadCases(currentDate, endDate) {
+
+  while (currentDate <= endDate) {
+    uploadCase(formatDate(currentDate), (err, result) => { console.log(err, result) })
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
 }
