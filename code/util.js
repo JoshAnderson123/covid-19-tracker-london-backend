@@ -71,33 +71,26 @@ const formatDate = date => {
   return [year, month, day].join('-');
 }
 
-const uploadAllCases = async () => {
+const uploadCases = async (currentDate, endDate) => {
 
-  const startDateStr = "2020-03-15"
-  const endDate = new Date("2020-12-25")
-
-  let currentDate = new Date(startDateStr)
   while (currentDate <= endDate) {
-    // console.log(formatDate(currentDate))
     axios.get(`${cfg.SERVER_URL}/uploadCaseData?date=${formatDate(currentDate)}`)
     currentDate.setDate(currentDate.getDate() + 1);
   }
 }
 
-const uploadCases = async (currentDate, endDate) => {
+const uploadAllCases = async () => {
 
-  while (currentDate <= endDate) { // TODO - check if response was successful or not
-    // console.log(formatDate(currentDate))
-    axios.get(`${cfg.SERVER_URL}/uploadCaseData?date=${formatDate(currentDate)}`)
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
+  const startDateStr = "2020-03-15"
+  const endDate = new Date("2020-12-25")
+  let currentDate = new Date(startDateStr)
+  uploadCases(currentDate, endDate)
 }
 
 
 
 module.exports = {
   caseFormatAPItoDB,
-  getData,
   getCases,
   uploadAllCases,
   uploadCases,

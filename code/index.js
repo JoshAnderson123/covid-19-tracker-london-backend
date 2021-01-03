@@ -157,7 +157,7 @@ function updateRecords() {
         else console.log(`Success updating new date: ${result}`)
       })
     } else {
-      console.log(`Records up to date. Current date: ${util.formatDate(currentDate)}. Latest date: ${util.formatDate(currentDateMin1)}.`)
+      console.log(`Records up to date. Current date: ${util.formatDate(currentDate)}. Latest date: ${util.formatDate(currentDateMin1)}`)
     }
   })
 }
