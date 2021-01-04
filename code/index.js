@@ -30,7 +30,15 @@ const router = express.Router();
 app.use("/", router);
 
 router.route("/test").get((req, res) => {
-  res.send("Hello World!") // Ready for Heroku
+  res.send("Hello World!")
+})
+
+router.route("/fetchFromAPI").get((req, res) => {
+  util.getCases(req.query.date).then(result => {
+    res.send(result)
+  }, error => {
+    res.send(error)
+  })
 })
 
 router.route("/uploadCaseData").get((req, res) => {
@@ -95,6 +103,7 @@ async function uploadCase(date, callback) {
 
   util.getCases(date).then(result => {
 
+    console.log("Date:", date, ". Result from API:", result)
     const formattedResult = util.caseFormatAPItoDB(result)
 
     model.cases.findOneAndUpdate({ date }, formattedResult, { upsert: true }, (err, result) => {
@@ -109,7 +118,7 @@ async function uploadCase(date, callback) {
 async function uploadCases(currentDate, endDate) {
 
   while (currentDate <= endDate) {
-    uploadCase(formatDate(currentDate), (err, result) => { console.log(err, result) })
+    uploadCase(util.formatDate(currentDate), (err, result) => { console.log(err, result) })
     currentDate.setDate(currentDate.getDate() + 1);
   }
 }
