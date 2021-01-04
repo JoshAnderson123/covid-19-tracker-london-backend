@@ -61,7 +61,7 @@ router.route("/getConfigData").get((req, res) => {
 app.listen(PORT, () => {
   console.log("Server is running on Port: " + PORT);
   updateRecords()
-  //setInterval(updateRecords, 24*60*60*1000) // Use this once the server is ready to upload
+  setInterval(updateRecords, 24*60*60*1000) // Use this once the server is ready to upload
 });
 
 
