@@ -1,6 +1,7 @@
 const express = require("express")
 const cors = require("cors")
 const mongoose = require("mongoose")
+const compression = require('compression')
 const model = require("./model")
 const axios = require("axios")
 const cfg = require("./config")
@@ -9,6 +10,7 @@ const util = require("./util")
 const PORT = process.env.PORT || 8080;
 const app = express()
 app.use(cors());
+app.use(compression());
 
 
 /// CONNECT TO MONGODB ///
