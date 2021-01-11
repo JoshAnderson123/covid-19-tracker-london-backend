@@ -136,15 +136,21 @@ async function uploadCases(currentDate, endDate) {
 function processCaseData(data, areaName) {
 
   const d = data.sort((a, b) => a.date < b.date ? -1 : 1)
-  const caseArr = []
+  const caseArr = [], deathArr = []
 
   for (let i = 0; i < d.length; i++) {
     const dateData = d[i].data
-    const dailyCase = areaName ?
+
+    const dailyCases = areaName ?
       dateData.filter(area => area.name === areaName)[0].cases :
       dateData.reduce((acc, area) => acc + area.cases, 0)
-    caseArr.push(dailyCase)
+    caseArr.push(dailyCases)
+
+    const dailyDeaths = areaName ?
+      dateData.filter(area => area.name === areaName)[0].deaths :
+      dateData.reduce((acc, area) => acc + area.deaths, 0)
+    deathArr.push(dailyDeaths)
   }
 
-  return caseArr
+  return {"area": areaName ? areaName : "London", "cases": caseArr, "deaths": deathArr}
 }
