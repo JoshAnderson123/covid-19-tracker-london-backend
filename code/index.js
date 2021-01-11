@@ -58,6 +58,14 @@ router.route("/getCaseData").get((req, res) => {
   })
 })
 
+router.route("/getProccessedData").get((req, res) => {
+  model.cases.find({}, (err, result) => {
+    if (err) res.send(err)
+    const arr = processCaseData(result, req.query.area)
+    res.send(arr)
+  })
+})
+
 router.route("/getConfigData").get((req, res) => {
   model.config.find({}, (err, result) => {
     if (err) res.send(err)
@@ -71,7 +79,7 @@ router.route("/getConfigData").get((req, res) => {
 app.listen(PORT, () => {
   console.log("Server is running on Port: " + PORT);
   updateRecords()
-  setInterval(updateRecords, 24*60*60*1000) // Use this once the server is ready to upload
+  setInterval(updateRecords, 24 * 60 * 60 * 1000) // Use this once the server is ready to upload
 });
 
 
@@ -123,4 +131,20 @@ async function uploadCases(currentDate, endDate) {
     uploadCase(util.formatDate(currentDate), (err, result) => { console.log(err, result) })
     currentDate.setDate(currentDate.getDate() + 1);
   }
+}
+
+function processCaseData(data, areaName) {
+
+  const d = data.sort((a, b) => a.date < b.date ? -1 : 1)
+  const caseArr = []
+
+  for (let i = 0; i < d.length; i++) {
+    const dateData = d[i].data
+    const dailyCase = areaName ?
+      dateData.filter(area => area.name === areaName)[0].cases :
+      dateData.reduce((acc, area) => acc + area.cases, 0)
+    caseArr.push(dailyCase)
+  }
+
+  return caseArr
 }
